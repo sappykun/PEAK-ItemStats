@@ -19,7 +19,7 @@ public partial class Plugin : BaseUnityPlugin
         Log = Logger;
 
         showPercentageSign = Config.Bind("Display", "ShowPercentageSign", true, "Whether to show a percentage sign (%) after numeric values.");
-        if (!showPercentageSign.Value) ItemStats.precentSign = "";
+        if (!showPercentageSign.Value) ItemStats.percentSign = "";
 
         Harmony.CreateAndPatchAll(typeof(ItemStats));
         
@@ -36,7 +36,7 @@ public static class ItemStats
     private static float rainbowHue = 0f;
     private static int index = 0;
 
-    public static string precentSign = "%";
+    public static string percentSign = "%";
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(InventoryItemUI), nameof(InventoryItemUI.SetItem))]
@@ -70,23 +70,23 @@ public static class ItemStats
         Action_InflictPoison inflictPoisonComponent = item.gameObject.GetComponent<Action_InflictPoison>();
         if (inflictPoisonComponent)
         {
-            int incriment = 1;
+            int increment = 1;
             float value = inflictPoisonComponent.poisonPerSecond * inflictPoisonComponent.inflictionTime * 100;
             if (poisonTMP.text != "0")
             {
-                value += float.Parse(poisonTMP.text.Replace(precentSign, ""));
-                incriment = 0;
+                value += float.Parse(poisonTMP.text.Replace(percentSign, ""));
+                increment = 0;
             }
-            string poisonPercentage = "+" + Mathf.Round(value).ToString() + precentSign; ;
+            string poisonPercentage = "+" + Mathf.Round(value).ToString() + percentSign; ;
             poisonTMP.text = poisonPercentage;
-            UpdateStats(ref poisonStat, ref index, incriment);
+            UpdateStats(ref poisonStat, ref index, increment);
         }
 
         Action_RestoreHunger restoreHungerComponent = item.gameObject.GetComponent<Action_RestoreHunger>();
         if (restoreHungerComponent && restoreHungerComponent.restorationAmount != 0)
         {
             float value = restoreHungerComponent.restorationAmount * 100;
-            string restorationPercentage = "-" + Mathf.Round(value).ToString() + precentSign;
+            string restorationPercentage = "-" + Mathf.Round(value).ToString() + percentSign;
             hungerTMP.text = restorationPercentage;
             UpdateStats(ref hungerStat, ref index);
         }
@@ -94,7 +94,7 @@ public static class ItemStats
         Action_GiveExtraStamina extraStaminaComponent = item.gameObject.GetComponent<Action_GiveExtraStamina>();
         if (extraStaminaComponent && extraStaminaComponent.amount != 0)
         {
-            string staminaPercentage = "+" + (extraStaminaComponent.amount * 100).ToString() + precentSign; ;
+            string staminaPercentage = "+" + (extraStaminaComponent.amount * 100).ToString() + percentSign; ;
             extraStaminaTMP.text = staminaPercentage;
             UpdateStats(ref extraStaminaStat, ref index);
         }
@@ -109,7 +109,7 @@ public static class ItemStats
             infiniteStaminaImage.color = rainbow;
             infiniteStaminaTMP.color = rainbow;
 
-            string drowsyPercentage = "+" + (infiniteStaminaComponent.drowsyAmount * 100).ToString() + precentSign; ;
+            string drowsyPercentage = "+" + (infiniteStaminaComponent.drowsyAmount * 100).ToString() + percentSign; ;
             sleepyTMP.text = drowsyPercentage;
             UpdateStats(ref sleepyStat, ref index);
 
@@ -216,14 +216,14 @@ public static class ItemStats
         {
             float value = statusComponent.changeAmount * 100;
             if (value == 0) continue;
-            string changePrecent = Mathf.Round(value).ToString() + precentSign;
+            string changePercent = Mathf.Round(value).ToString() + percentSign;
             var statusType = statusComponent.statusType;
 
             if (statusType == status)
             {
                 string sign = "";
                 if (value > 0) sign = "+";
-                objectTMP.text = sign + changePrecent;
+                objectTMP.text = sign + changePercent;
                 UpdateStats(ref objectIcon, ref index);
             }
         }
@@ -231,11 +231,11 @@ public static class ItemStats
 
 
 
-    private static void UpdateStats(ref GameObject icon, ref int index, int incriment = 1)
+    private static void UpdateStats(ref GameObject icon, ref int index, int increment = 1)
     {
         Vector3 position;
         icon.SetActive(true);
-        index += incriment;
+        index += increment;
         
         if (!instance.isTemporarySlot) position = new Vector3(60f, 80f + 20 * index, 0f);
         else position = new Vector3(20f, 120f + 20 * index, 0f);
