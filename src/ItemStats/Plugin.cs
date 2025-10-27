@@ -13,16 +13,20 @@ public partial class Plugin : BaseUnityPlugin
 {
     internal static ManualLogSource Log { get; private set; } = null!;
     private static ConfigEntry<bool>? showPercentageSign;
+    private static ConfigEntry<bool>? useInGameUnits;
 
     private void Awake()
     {
         Log = Logger;
 
         showPercentageSign = Config.Bind("Display", "ShowPercentageSign", true, "Whether to show a percentage sign (%) after numeric values.");
+        useInGameUnits = Config.Bind("Display", "UseInGameUnits", false, "Use in-game units (/40) rather than a percentage (/100).");
+
         if (!showPercentageSign.Value) ItemStats.percentSign = "";
+        if (useInGameUnits.Value) ItemStats.unitFactor = 40;
 
         Harmony.CreateAndPatchAll(typeof(ItemStats));
-        
+
         Log.LogInfo($"Plugin {Name} is loaded!");
     }
 }
@@ -37,6 +41,7 @@ public static class ItemStats
     private static int index = 0;
 
     public static string percentSign = "%";
+    public static int unitFactor = 100;
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(InventoryItemUI), nameof(InventoryItemUI.SetItem))]
@@ -71,7 +76,7 @@ public static class ItemStats
         if (inflictPoisonComponent)
         {
             int increment = 1;
-            float value = inflictPoisonComponent.poisonPerSecond * inflictPoisonComponent.inflictionTime * 100;
+            float value = inflictPoisonComponent.poisonPerSecond * inflictPoisonComponent.inflictionTime * unitFactor;
             if (poisonTMP.text != "0")
             {
                 value += float.Parse(poisonTMP.text.Replace(percentSign, ""));
@@ -85,7 +90,7 @@ public static class ItemStats
         Action_RestoreHunger restoreHungerComponent = item.gameObject.GetComponent<Action_RestoreHunger>();
         if (restoreHungerComponent && restoreHungerComponent.restorationAmount != 0)
         {
-            float value = restoreHungerComponent.restorationAmount * 100;
+            float value = restoreHungerComponent.restorationAmount * unitFactor;
             string restorationPercentage = "-" + Mathf.Round(value).ToString() + percentSign;
             hungerTMP.text = restorationPercentage;
             UpdateStats(ref hungerStat, ref index);
@@ -94,7 +99,7 @@ public static class ItemStats
         Action_GiveExtraStamina extraStaminaComponent = item.gameObject.GetComponent<Action_GiveExtraStamina>();
         if (extraStaminaComponent && extraStaminaComponent.amount != 0)
         {
-            string staminaPercentage = "+" + (extraStaminaComponent.amount * 100).ToString() + percentSign; ;
+            string staminaPercentage = "+" + (extraStaminaComponent.amount * unitFactor).ToString() + percentSign; ;
             extraStaminaTMP.text = staminaPercentage;
             UpdateStats(ref extraStaminaStat, ref index);
         }
@@ -109,7 +114,7 @@ public static class ItemStats
             infiniteStaminaImage.color = rainbow;
             infiniteStaminaTMP.color = rainbow;
 
-            string drowsyPercentage = "+" + (infiniteStaminaComponent.drowsyAmount * 100).ToString() + percentSign; ;
+            string drowsyPercentage = "+" + (infiniteStaminaComponent.drowsyAmount * unitFactor).ToString() + percentSign; ;
             sleepyTMP.text = drowsyPercentage;
             UpdateStats(ref sleepyStat, ref index);
 
@@ -214,7 +219,7 @@ public static class ItemStats
         Action_ModifyStatus[] statusComponents = item.gameObject.GetComponents<Action_ModifyStatus>();
         foreach (Action_ModifyStatus statusComponent in statusComponents)
         {
-            float value = statusComponent.changeAmount * 100;
+            float value = statusComponent.changeAmount * unitFactor;
             if (value == 0) continue;
             string changePercent = Mathf.Round(value).ToString() + percentSign;
             var statusType = statusComponent.statusType;
