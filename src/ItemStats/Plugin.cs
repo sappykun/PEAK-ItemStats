@@ -14,18 +14,13 @@ namespace ItemStats;
 public partial class Plugin : BaseUnityPlugin
 {
     internal static ManualLogSource Log { get; private set; } = null!;
-    private static ConfigEntry<bool>? showPercentageSign;
-    private static ConfigEntry<bool>? useInGameUnits;
+    public static ConfigEntry<bool>? useInGameUnits;
 
     private void Awake()
     {
         Log = Logger;
 
-        showPercentageSign = Config.Bind("Display", "ShowPercentageSign", true, "Whether to show a percentage sign (%) after numeric values.");
         useInGameUnits = Config.Bind("Display", "UseInGameUnits", false, "Use in-game units (/40) rather than a percentage (/100).");
-
-        if (!showPercentageSign.Value) ItemStats.percentSign = "";
-        if (useInGameUnits.Value) ItemStats.unitFactor = 40;
 
         Harmony.CreateAndPatchAll(typeof(ItemStats));
 
@@ -54,6 +49,17 @@ public static class ItemStats
         GameObject slotGameObject = __instance.fuelBar.transform.parent.gameObject;
 
         if (__instance.isBackpack) return;
+        
+        if (Plugin.useInGameUnits != null && Plugin.useInGameUnits.Value)
+        {
+            percentSign = "";
+            unitFactor = 40;
+        }
+        else
+        {
+            percentSign = "%";
+            unitFactor = 100;
+        }
 
         Initialize(out GameObject hungerStat, out GameObject hungerText, out TextMeshProUGUI hungerTMP);
 
@@ -71,6 +77,7 @@ public static class ItemStats
         AddNewStat(out GameObject invincibilityStat, out TextMeshProUGUI invincibilityTMP, "GAME/GUIManager/Canvas_HUD/BarGroup/Bar/OutlineMask/Outline/Shield/ShieldIcon", "invincibilityStat");
 
         AddNewStat(out GameObject poisonStat, out TextMeshProUGUI poisonTMP, "GAME/GUIManager/Canvas_HUD/BarGroup/Bar/LayoutGroup/Poison/Icon", "poisonStat", CharacterAfflictions.STATUSTYPE.Poison);
+        AddNewStat(out GameObject thornsStat, out TextMeshProUGUI thornsTMP, "GAME/GUIManager/Canvas_HUD/BarGroup/Bar/LayoutGroup/Thorns/Icon", "thornsStat", CharacterAfflictions.STATUSTYPE.Thorns);
 
 
         Item item = Character.localCharacter.data.currentItem;
@@ -100,6 +107,17 @@ public static class ItemStats
             string restorationPercentage = "-" + Mathf.Round(value).ToString() + percentSign;
             hungerTMP.text = restorationPercentage;
             UpdateStats(ref hungerStat, ref index);
+        }
+        
+        // Each thorn adds 2 units or 5% of Thorns so we need to divide the value by 20
+        Action_AddOrRemoveThorns addOrRemoveThornsComponent = item.gameObject.GetComponent<Action_AddOrRemoveThorns>();
+        if (addOrRemoveThornsComponent && addOrRemoveThornsComponent.thornCount != 0)
+        {
+            float value = addOrRemoveThornsComponent.thornCount * unitFactor / 20f;
+            string sign = value > 0 ? "+" : "";
+            string restorationPercentage = sign + Mathf.Round(value).ToString() + percentSign;
+            thornsTMP.text = restorationPercentage;
+            UpdateStats(ref thornsStat, ref index);
         }
 
         Action_GiveExtraStamina extraStaminaComponent = item.gameObject.GetComponent<Action_GiveExtraStamina>();
@@ -279,6 +297,13 @@ public static class ItemStats
                 string sign = "";
                 if (value > 0) sign = "+";
                 objectTMP.text = sign + changePercent;
+                UpdateStats(ref objectIcon, ref index);
+            }
+
+            if (status == CharacterAfflictions.STATUSTYPE.Spores &&
+                statusType == CharacterAfflictions.STATUSTYPE.Poison && value < 0)
+            {
+                objectTMP.text = changePercent;
                 UpdateStats(ref objectIcon, ref index);
             }
         }
