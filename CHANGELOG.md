@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.1
+- Fixed the Shield icon path for Peak's 1.60 update
+
 ## 0.6.0
 - Added Weight Stat
 - Added Thorns Stat
