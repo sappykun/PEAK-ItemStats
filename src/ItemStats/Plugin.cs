@@ -84,7 +84,7 @@ public static class ItemStats
         AddNewStat(out GameObject sporesStat, out TextMeshProUGUI SporesTMP, "GAME/GUIManager/Canvas_HUD/BarGroup/Bar/LayoutGroup/Spores/Icon", "sporesStat", CharacterAfflictions.STATUSTYPE.Spores);
         AddNewStat(out GameObject infiniteStaminaStat, out TextMeshProUGUI infiniteStaminaTMP, "GAME/GUIManager/Canvas_HUD/BarGroup/ExtraStaminaBar/Icon", "infiniteStaminaStat");
         AddNewStat(out GameObject fasterBoiStat, out TextMeshProUGUI fasterBoiTMP, "GAME/GUIManager/Canvas_HUD/BarGroup/ExtraStaminaBar/Icon", "fasterBoiStat");
-        AddNewStat(out GameObject invincibilityStat, out TextMeshProUGUI invincibilityTMP, "GAME/GUIManager/Canvas_HUD/BarGroup/Bar/OutlineMask/Outline/Shield/ShieldIcon", "invincibilityStat");
+        AddNewStat(out GameObject invincibilityStat, out TextMeshProUGUI invincibilityTMP, "GAME/GUIManager/Canvas_HUD/BarGroup/Bar/OutlineMask/Outline/ShieldIcon", "invincibilityStat");
 
         AddNewStat(out GameObject poisonStat, out TextMeshProUGUI poisonTMP, "GAME/GUIManager/Canvas_HUD/BarGroup/Bar/LayoutGroup/Poison/Icon", "poisonStat", CharacterAfflictions.STATUSTYPE.Poison);
         AddNewStat(out GameObject thornsStat, out TextMeshProUGUI thornsTMP, "GAME/GUIManager/Canvas_HUD/BarGroup/Bar/LayoutGroup/Thorns/Icon", "thornsStat", CharacterAfflictions.STATUSTYPE.Thorns);
