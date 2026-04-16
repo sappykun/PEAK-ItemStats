@@ -1,7 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
-using ExitGames.Client.Photon.StructWrapping;
 using HarmonyLib;
 using Peak.Afflictions;
 using TMPro;
@@ -172,13 +171,16 @@ public static class ItemStats
 
                 Affliction_InfiniteStamina infiniteStamina = (Affliction_InfiniteStamina)applyAfflictionComponent.affliction;
                 Affliction_AdjustDrowsyOverTime adjustDrowsyOverTime = (Affliction_AdjustDrowsyOverTime)infiniteStamina.drowsyAffliction;
-                float drowsyTime = infiniteStamina.drowsyAffliction.totalTime * adjustDrowsyOverTime.statusPerSecond;
 
-                string drowsyPercentage = "+" + Mathf.Round(drowsyTime * unitFactor).ToString() + percentSign;
-                sleepyTMP.text = drowsyPercentage;
-                UpdateStats(ref sleepyStat, ref index);
+                if (adjustDrowsyOverTime != null) 
+                {
+                    float drowsyTime = infiniteStamina.drowsyAffliction.totalTime * adjustDrowsyOverTime.statusPerSecond;
+                    string drowsyPercentage = "+" + Mathf.Round(drowsyTime * unitFactor).ToString() + percentSign;
+                    sleepyTMP.text = drowsyPercentage;
+                    UpdateStats(ref sleepyStat, ref index);
+                }
 
-                string staminaTime = applyAfflictionComponent.affliction.totalTime.ToString() + "sec";
+                string staminaTime = infiniteStamina.totalTime.ToString() + "sec";
                 infiniteStaminaTMP.text = staminaTime;
                 UpdateStats(ref infiniteStaminaStat, ref index);
             }
